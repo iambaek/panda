@@ -550,6 +550,8 @@ class Panda:
       "hardfault_reset": bool(flags & self.HEALTH_FLAG_HARDFAULT_RESET),
       "sound_output_level": a[19],
       "temperature": a[20] - 40.0,
+      "controls_allowed_lateral": a[21] & 1,
+      "controls_allowed_longitudinal": (a[21] >> 1) & 1,
     }
 
   @ensure_health_packet_version

@@ -51,6 +51,8 @@ static int get_health_pkt(void *dat) {
   float temperature_encoded = (CLAMP(dts_get_temperature(), -40.0f, 214.5f) + 40.0f) + 0.5f;
   health->temperature_pkt = (uint8_t)temperature_encoded;
 
+  health->controls_allowed_sp_pkt = (uint8_t)(((controls_allowed || controls_allowed_lateral) ? 1U : 0U) | (controls_allowed ? 2U : 0U));
+
   return sizeof(*health);
 }
 
@@ -243,6 +245,7 @@ int comms_control_handler(ControlPacket_t *req, uint8_t *resp) {
       // you can only set this if you are in a non car safety mode
       if (!is_car_safety_mode(current_safety_mode)) {
         alternative_experience = req->param1;
+        mads_set_alternative_experience(&alternative_experience);
       }
       break;
     // **** 0xe5: set CAN loopback (for testing)
@@ -282,6 +285,7 @@ int comms_control_handler(ControlPacket_t *req, uint8_t *resp) {
         heartbeat_lost = false;
         heartbeat_disabled = false;
         heartbeat_engaged = (req->param1 == 1U);
+        heartbeat_engaged_mads = (req->param2 == 1U);
         break;
       }
     // **** 0xf6: set siren enabled
